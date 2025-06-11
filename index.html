@@ -1,0 +1,737 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>油圧シリンダ用語タイピングゲーム</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+            color: #333;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            padding: 30px;
+            text-align: center;
+            color: white;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        .header p {
+            font-size: 1.1em;
+            opacity: 0.9;
+        }
+
+        .game-area {
+            padding: 40px;
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .stat-card {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            padding: 20px;
+            border-radius: 15px;
+            text-align: center;
+            color: white;
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+        }
+
+        .stat-value {
+            font-size: 2em;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .stat-label {
+            font-size: 0.9em;
+            opacity: 0.9;
+        }
+
+        .word-display {
+            background: #f8f9fa;
+            border-radius: 15px;
+            padding: 40px;
+            text-align: center;
+            margin-bottom: 30px;
+            border: 3px solid #e9ecef;
+            transition: all 0.3s ease;
+        }
+
+        .current-word {
+            font-size: 3em;
+            font-weight: bold;
+            color: #2c3e50;
+            margin-bottom: 15px;
+            letter-spacing: 2px;
+        }
+
+        .word-meaning {
+            font-size: 1.2em;
+            color: #666;
+            margin-bottom: 20px;
+            line-height: 1.6;
+        }
+
+        .typed-text {
+            color: #27ae60;
+        }
+
+        .current-char {
+            background: #3498db;
+            color: white;
+            padding: 2px 4px;
+            border-radius: 4px;
+        }
+
+        .input-area {
+            margin-bottom: 30px;
+        }
+
+        .typing-input {
+            width: 100%;
+            padding: 20px;
+            font-size: 1.5em;
+            border: 3px solid #e9ecef;
+            border-radius: 15px;
+            outline: none;
+            transition: all 0.3s ease;
+            font-family: 'Courier New', monospace;
+        }
+
+        .typing-input:focus {
+            border-color: #3498db;
+            box-shadow: 0 0 20px rgba(52, 152, 219, 0.3);
+        }
+
+        .controls {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 15px 30px;
+            font-size: 1.1em;
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-secondary {
+            background: linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%);
+            color: #333;
+        }
+
+        .btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 10px;
+            background: #e9ecef;
+            border-radius: 5px;
+            margin: 20px 0;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #4facfe 0%, #00f2fe 100%);
+            transition: width 0.3s ease;
+            border-radius: 5px;
+        }
+
+        .game-over {
+            text-align: center;
+            padding: 40px;
+            background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);
+            border-radius: 15px;
+            margin-top: 20px;
+        }
+
+        .game-over h2 {
+            font-size: 2.5em;
+            color: #2c3e50;
+            margin-bottom: 20px;
+        }
+
+        .final-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin: 30px 0;
+        }
+
+        .final-stat {
+            background: rgba(255, 255, 255, 0.8);
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+        }
+
+        .animate-correct {
+            animation: correctPulse 0.5s ease;
+        }
+
+        .animate-incorrect {
+            animation: incorrectShake 0.5s ease;
+        }
+
+        .input-error {
+            border-color: #e74c3c !important;
+            background-color: #ffebee !important;
+            box-shadow: 0 0 20px rgba(231, 76, 60, 0.4) !important;
+        }
+
+        .error-message {
+            background: linear-gradient(135deg, #ff6b6b 0%, #ee5a5a 100%);
+            color: white;
+            padding: 10px 20px;
+            border-radius: 25px;
+            font-size: 1em;
+            font-weight: bold;
+            margin: 10px 0;
+            text-align: center;
+            opacity: 0;
+            transform: translateY(-10px);
+            transition: all 0.3s ease;
+            display: none;
+        }
+
+        .error-message.show {
+            opacity: 1;
+            transform: translateY(0);
+            display: block;
+        }
+
+        @keyframes correctPulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); background-color: #d4edda; }
+            100% { transform: scale(1); }
+        }
+
+        @keyframes incorrectShake {
+            0%, 100% { transform: translateX(0); }
+            10%, 30%, 50%, 70%, 90% { transform: translateX(-8px); }
+            20%, 40%, 60%, 80% { transform: translateX(8px); }
+        }
+
+        @keyframes errorPulse {
+            0% { background-color: #ffebee; }
+            50% { background-color: #ffcdd2; }
+            100% { background-color: #ffebee; }
+        }
+
+        @media (max-width: 600px) {
+            .header h1 { font-size: 2em; }
+            .current-word { font-size: 2em; }
+            .typing-input { font-size: 1.2em; }
+            .controls { flex-direction: column; }
+            .btn { width: 100%; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🔧 油圧シリンダ用語タイピング</h1>
+            <p>専門用語を覚えながらタイピング技術を向上させよう！</p>
+        </div>
+
+        <div class="game-area">
+            <div class="stats">
+                <div class="stat-card">
+                    <div class="stat-value" id="wpm">0</div>
+                    <div class="stat-label">文字/分</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="accuracy">100</div>
+                    <div class="stat-label">正確率(%)</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="score">0</div>
+                    <div class="stat-label">スコア</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="time">60</div>
+                    <div class="stat-label">残り時間</div>
+                </div>
+            </div>
+
+            <div class="word-display" id="wordDisplay">
+                <div class="current-word" id="currentWord">スタートボタンを押してください</div>
+                <div class="word-meaning" id="wordMeaning">ゲームを開始する準備ができました</div>
+                <div style="font-size: 0.9em; color: #666; margin-top: 10px;">💡 入力完了後は<kbd style="background: #f0f0f0; padding: 2px 6px; border-radius: 3px; font-weight: bold;">Enter</kbd>キーを押してください</div>
+            </div>
+
+            <div class="progress-bar">
+                <div class="progress-fill" id="progressFill" style="width: 0%"></div>
+            </div>
+
+            <div class="input-area">
+                <div class="error-message" id="errorMessage">❌ 間違った文字です！正しく入力してください</div>
+                <input type="text" class="typing-input" id="typingInput" placeholder="ここに入力してください..." disabled>
+            </div>
+
+            <div class="controls">
+                <button class="btn btn-primary" id="startBtn">ゲーム開始</button>
+                <button class="btn btn-secondary" id="resetBtn">リセット</button>
+            </div>
+
+            <div class="game-over" id="gameOver" style="display: none;">
+                <h2>🎉 ゲーム終了！</h2>
+                <div class="final-stats">
+                    <div class="final-stat">
+                        <h3>最終スコア</h3>
+                        <div id="finalScore">0</div>
+                    </div>
+                    <div class="final-stat">
+                        <h3>文字数/分</h3>
+                        <div id="finalWPM">0</div>
+                    </div>
+                    <div class="final-stat">
+                        <h3>正確率</h3>
+                        <div id="finalAccuracy">100%</div>
+                    </div>
+                    <div class="final-stat">
+                        <h3>完了した単語</h3>
+                        <div id="wordsCompleted">0</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 油圧シリンダ関連の専門用語データベース（ひらがな入力対応）
+        const words = [
+            { term: "ぴすとん", meaning: "シリンダ内で往復運動する部品" },
+            { term: "ぴすとんろっど", meaning: "ピストンに接続された棒状の部品" },
+            { term: "しりんだ", meaning: "ピストンが移動する円筒状の容器" },
+            { term: "ゆあつ", meaning: "液体の圧力を利用した動力伝達方式" },
+            { term: "しーる", meaning: "液体の漏れを防ぐ密封部品" },
+            { term: "へっど", meaning: "シリンダの端部を塞ぐカバー" },
+            { term: "ぽーと", meaning: "油圧流体の入出力口" },
+            { term: "すとろーく", meaning: "ピストンの移動距離" },
+            { term: "あつりょく", meaning: "単位面積あたりにかかる力" },
+            { term: "りゅうりょう", meaning: "単位時間あたりの流体移動量" },
+            { term: "ばるぶ", meaning: "流体の流れを制御する弁" },
+            { term: "あきゅむれーた", meaning: "圧力エネルギーを蓄積する装置" },
+            { term: "ふぃるた", meaning: "流体中の不純物を除去する装置" },
+            { term: "りりーふばるぶ", meaning: "過圧を防ぐ安全弁" },
+            { term: "ちぇっくばるぶ", meaning: "逆流を防ぐ一方向弁" },
+            { term: "すろっとるばるぶ", meaning: "流量を調整する絞り弁" },
+            { term: "ぱいろっと", meaning: "主弁を操作する制御信号" },
+            { term: "だんぱ", meaning: "振動や衝撃を吸収する装置" },
+            { term: "ぶっしゅ", meaning: "軸受けとして使用される円筒状部品" },
+            { term: "がすけっと", meaning: "接合面の密封材" },
+            { term: "まにほーるど", meaning: "複数の流路を集約する配管部品" },
+            { term: "さーぼばるぶ", meaning: "精密な流量制御が可能な電気油圧弁" },
+            { term: "ぷろぽーしょなるばるぶ", meaning: "入力信号に比例して出力を制御する弁" },
+            { term: "さどうゆ", meaning: "油圧システムで使用される専用オイル" },
+            { term: "ねんど", meaning: "流体の流れにくさを表す指標" },
+            { term: "ほんたい", meaning: "シリンダの主要部分" },
+            { term: "ろっどしーる", meaning: "ロッド部分の密封装置" },
+            { term: "ぴすとんしーる", meaning: "ピストン部分の密封装置" },
+            { term: "えんどきゃっぷ", meaning: "シリンダの端部カバー" },
+            { term: "ぐらんどぱっきん", meaning: "ロッド貫通部の密封材" }
+        ];
+
+        // ゲーム状態管理
+        let gameState = {
+            isPlaying: false,
+            currentWordIndex: 0,
+            currentCharIndex: 0,
+            totalChars: 0,
+            correctChars: 0,
+            incorrectChars: 0,
+            wordsCompleted: 0,
+            startTime: null,
+            timeLeft: 60,
+            timer: null,
+            score: 0,
+            isComposing: false // 日本語入力中フラグ
+        };
+
+        // DOM要素
+        const elements = {
+            currentWord: document.getElementById('currentWord'),
+            wordMeaning: document.getElementById('wordMeaning'),
+            typingInput: document.getElementById('typingInput'),
+            startBtn: document.getElementById('startBtn'),
+            resetBtn: document.getElementById('resetBtn'),
+            wpm: document.getElementById('wpm'),
+            accuracy: document.getElementById('accuracy'),
+            score: document.getElementById('score'),
+            time: document.getElementById('time'),
+            progressFill: document.getElementById('progressFill'),
+            wordDisplay: document.getElementById('wordDisplay'),
+            gameOver: document.getElementById('gameOver'),
+            finalScore: document.getElementById('finalScore'),
+            finalWPM: document.getElementById('finalWPM'),
+            finalAccuracy: document.getElementById('finalAccuracy'),
+            wordsCompleted: document.getElementById('wordsCompleted'),
+            errorMessage: document.getElementById('errorMessage')
+        };
+
+        // エラー演出を表示
+        function showErrorFeedback() {
+            // 入力欄の見た目を変更
+            elements.typingInput.classList.add('input-error');
+            
+            // エラーメッセージを表示
+            elements.errorMessage.classList.add('show');
+            
+            // 単語表示エリアを振動
+            elements.wordDisplay.classList.add('animate-incorrect');
+            
+            // バイブレーション（対応デバイス）
+            if ('vibrate' in navigator) {
+                navigator.vibrate([100, 50, 100]);
+            }
+            
+            // 一定時間後に演出をリセット
+            setTimeout(() => {
+                elements.typingInput.classList.remove('input-error');
+                elements.errorMessage.classList.remove('show');
+                elements.wordDisplay.classList.remove('animate-incorrect');
+            }, 1000);
+        }
+
+        // エラー演出を即座にクリア
+        function clearErrorFeedback() {
+            elements.typingInput.classList.remove('input-error');
+            elements.errorMessage.classList.remove('show');
+            elements.wordDisplay.classList.remove('animate-incorrect');
+        }
+        function displayNewWord() {
+            const randomIndex = Math.floor(Math.random() * words.length);
+            gameState.currentWordIndex = randomIndex;
+            gameState.currentCharIndex = 0;
+            
+            const word = words[randomIndex];
+            elements.currentWord.textContent = word.term;
+            elements.wordMeaning.textContent = word.meaning;
+            elements.typingInput.value = '';
+            
+            updateWordDisplay();
+        }
+
+        // 単語表示の更新（入力状況に応じて色分け）
+        function updateWordDisplay() {
+            const word = words[gameState.currentWordIndex].term;
+            const typed = elements.typingInput.value;
+            let html = '';
+            
+            for (let i = 0; i < word.length; i++) {
+                if (i < typed.length) {
+                    if (typed[i] === word[i]) {
+                        html += `<span class="typed-text">${word[i]}</span>`;
+                    } else {
+                        html += `<span style="color: #e74c3c; background: #ffebee;">${word[i]}</span>`;
+                    }
+                } else if (i === typed.length) {
+                    html += `<span class="current-char">${word[i]}</span>`;
+                } else {
+                    html += word[i];
+                }
+            }
+            
+            elements.currentWord.innerHTML = html;
+        }
+
+        // 統計の更新
+        function updateStats() {
+            if (!gameState.startTime) return;
+            
+            const elapsedMinutes = (Date.now() - gameState.startTime) / 60000;
+            const wpm = elapsedMinutes > 0 ? Math.round(gameState.correctChars / elapsedMinutes) : 0;
+            const accuracy = gameState.totalChars > 0 ? 
+                Math.round((gameState.correctChars / gameState.totalChars) * 100) : 100;
+            
+            elements.wpm.textContent = wpm;
+            elements.accuracy.textContent = accuracy;
+            elements.score.textContent = gameState.score;
+            elements.time.textContent = gameState.timeLeft;
+            
+            // プログレスバーの更新
+            const progress = ((60 - gameState.timeLeft) / 60) * 100;
+            elements.progressFill.style.width = `${progress}%`;
+        }
+
+        // タイマー機能
+        function startTimer() {
+            gameState.timer = setInterval(() => {
+                gameState.timeLeft--;
+                updateStats();
+                
+                if (gameState.timeLeft <= 0) {
+                    endGame();
+                }
+            }, 1000);
+        }
+
+        // ゲーム開始
+        function startGame() {
+            gameState.isPlaying = true;
+            gameState.startTime = Date.now();
+            gameState.timeLeft = 60;
+            gameState.currentCharIndex = 0;
+            gameState.totalChars = 0;
+            gameState.correctChars = 0;
+            gameState.incorrectChars = 0;
+            gameState.wordsCompleted = 0;
+            gameState.score = 0;
+            gameState.isComposing = false;
+            
+            elements.typingInput.disabled = false;
+            elements.typingInput.focus();
+            elements.startBtn.textContent = 'プレイ中...';
+            elements.startBtn.disabled = true;
+            elements.gameOver.style.display = 'none';
+            
+            displayNewWord();
+            startTimer();
+            updateStats();
+        }
+
+        // ゲーム終了
+        function endGame() {
+            gameState.isPlaying = false;
+            clearInterval(gameState.timer);
+            
+            elements.typingInput.disabled = true;
+            elements.startBtn.textContent = 'ゲーム開始';
+            elements.startBtn.disabled = false;
+            
+            // 最終結果の表示
+            const elapsedMinutes = (Date.now() - gameState.startTime) / 60000;
+            const finalWPM = elapsedMinutes > 0 ? Math.round(gameState.correctChars / elapsedMinutes) : 0;
+            const finalAccuracy = gameState.totalChars > 0 ? 
+                Math.round((gameState.correctChars / gameState.totalChars) * 100) : 100;
+            
+            elements.finalScore.textContent = gameState.score;
+            elements.finalWPM.textContent = finalWPM;
+            elements.finalAccuracy.textContent = `${finalAccuracy}%`;
+            elements.wordsCompleted.textContent = gameState.wordsCompleted;
+            
+            elements.gameOver.style.display = 'block';
+        }
+
+        // ゲームリセット
+        function resetGame() {
+            if (gameState.timer) {
+                clearInterval(gameState.timer);
+            }
+            
+            gameState.isPlaying = false;
+            gameState.timeLeft = 60;
+            gameState.score = 0;
+            gameState.totalChars = 0;
+            gameState.correctChars = 0;
+            gameState.incorrectChars = 0;
+            gameState.wordsCompleted = 0;
+            gameState.startTime = null;
+            
+            elements.typingInput.disabled = true;
+            elements.typingInput.value = '';
+            elements.startBtn.textContent = 'ゲーム開始';
+            elements.startBtn.disabled = false;
+            elements.currentWord.textContent = 'スタートボタンを押してください';
+            elements.wordMeaning.textContent = 'ゲームを開始する準備ができました';
+            elements.gameOver.style.display = 'none';
+            elements.progressFill.style.width = '0%';
+            
+            updateStats();
+        }
+
+        // 入力イベントハンドラ
+        elements.typingInput.addEventListener('input', function(e) {
+            if (!gameState.isPlaying) return;
+            
+            const word = words[gameState.currentWordIndex].term;
+            const typed = e.target.value;
+            const previousLength = gameState.currentCharIndex;
+            
+            // 表示は常に更新（日本語入力中でも）
+            updateWordDisplay();
+            
+            // 日本語入力中はエラーチェックと統計更新をスキップ
+            if (gameState.isComposing) {
+                return;
+            }
+            
+            // エラー演出をクリア（正常な入力の場合）
+            clearErrorFeedback();
+            
+            // 新しく入力された文字のみをチェック（1文字ずつの入力を想定）
+            if (typed.length > previousLength) {
+                const newChar = typed[typed.length - 1];
+                const expectedChar = word[typed.length - 1];
+                
+                // 新しい文字が間違っている場合
+                if (newChar !== expectedChar || typed.length > word.length) {
+                    // エラー演出を表示
+                    showErrorFeedback();
+                    
+                    // 間違った文字を削除（正しい部分まで戻す）
+                    e.target.value = typed.substring(0, typed.length - 1);
+                    
+                    // 統計に反映
+                    gameState.incorrectChars++;
+                    gameState.totalChars++;
+                    
+                    updateStats();
+                    updateWordDisplay(); // 削除後も表示更新
+                    return; // 処理を終了
+                }
+                
+                // 正しい文字が入力された場合
+                gameState.totalChars++;
+                gameState.correctChars++;
+                gameState.score += 10;
+                gameState.currentCharIndex = typed.length;
+            } else if (typed.length < previousLength) {
+                // バックスペースで文字が削除された場合
+                gameState.currentCharIndex = typed.length;
+            }
+            
+            const correctedTyped = e.target.value;
+            
+            // 単語完成チェック（表示のみ、確定はEnterキーで）
+            if (correctedTyped === word) {
+                // 視覚的フィードバックのみ（自動確定はしない）
+                elements.wordDisplay.style.backgroundColor = '#e8f5e8';
+                elements.wordDisplay.style.borderColor = '#4caf50';
+            } else {
+                // 通常の表示に戻す
+                elements.wordDisplay.style.backgroundColor = '#f8f9fa';
+                elements.wordDisplay.style.borderColor = '#e9ecef';
+            }
+            
+            updateStats();
+        });
+
+        // 日本語入力の開始を検知
+        elements.typingInput.addEventListener('compositionstart', function(e) {
+            gameState.isComposing = true;
+            clearErrorFeedback(); // 入力中はエラー演出をクリア
+        });
+
+        // 日本語入力の確定を検知
+        elements.typingInput.addEventListener('compositionend', function(e) {
+            gameState.isComposing = false;
+            // 確定後に入力内容をチェック
+            setTimeout(() => {
+                if (gameState.isPlaying) {
+                    elements.typingInput.dispatchEvent(new Event('input'));
+                }
+            }, 0);
+        });
+
+        // キーイベントハンドラ（Enterキー対応）
+        elements.typingInput.addEventListener('keydown', function(e) {
+            if (!gameState.isPlaying) return;
+            
+            if (e.key === 'Enter') {
+                const word = words[gameState.currentWordIndex].term;
+                const typed = e.target.value;
+                
+                // 単語が正しく完成している場合
+                if (typed === word) {
+                    gameState.wordsCompleted++;
+                    gameState.score += 50; // ボーナス点
+                    
+                    // アニメーション効果
+                    elements.wordDisplay.classList.add('animate-correct');
+                    
+                    // エラー演出をクリア
+                    clearErrorFeedback();
+                    
+                    // 入力欄をクリア
+                    e.target.value = '';
+                    gameState.currentCharIndex = 0;
+                    gameState.isComposing = false;
+                    
+                    // 表示を更新
+                    updateWordDisplay();
+                    updateStats();
+                    
+                    // 少し遅延して次の単語を表示
+                    setTimeout(() => {
+                        elements.wordDisplay.classList.remove('animate-correct');
+                        displayNewWord();
+                        elements.typingInput.focus();
+                    }, 300);
+                    
+                    e.preventDefault(); // デフォルトのEnter動作を防ぐ
+                    return;
+                }
+                
+                // 入力が完成していない場合はエラー演出
+                if (typed.length < word.length) {
+                    showErrorFeedback();
+                    e.preventDefault();
+                }
+            }
+            
+            if (e.key === 'Escape') {
+                e.target.value = '';
+                gameState.currentCharIndex = 0;
+                clearErrorFeedback();
+                updateWordDisplay();
+                e.preventDefault();
+            }
+        });
+
+        // ボタンイベントリスナー
+        elements.startBtn.addEventListener('click', startGame);
+        elements.resetBtn.addEventListener('click', resetGame);
+
+        // 初期化
+        resetGame();
+    </script>
+</body>
+</html>
